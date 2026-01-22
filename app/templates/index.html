@@ -164,7 +164,8 @@
       <li>ボタンを選択してからまとめて送信できるようになりました</li>
       <li>てつとぽんずのアイコンを分かりやすくしました</li>
       <li>通常業務に”風呂洗い”を追加しました</li>
-      <li>てつのタスクに薬を入れました</li>
+      <li>てつのタスクに”薬”を入れました</li>
+      <li>すべてのタスクを完了すると"🎉 Congratulation!"が表示されるようになりました</li>
     </ul>
   </div>
 </div>
@@ -174,32 +175,43 @@
 <script>
 const pending = {};
 
+// 初期状態を記録（DBの状態）
+document.querySelectorAll(".ytn-toggle").forEach(btn => {
+  btn.dataset.original = btn.classList.contains("is-done") ? "1" : "0";
+});
+
 document.querySelectorAll(".ytn-toggle").forEach(btn => {
   btn.addEventListener("click", () => {
-    const dog = btn.dataset.dog || "";
+    const dog  = btn.dataset.dog || "";
     const time = btn.dataset.time || "";
     const task = btn.dataset.task || "";
 
     const key = task !== "" ? "task|" + task : "feed|" + dog + "|" + time;
 
-    const isDone = btn.classList.contains("is-done");
+    const original = btn.dataset.original === "1"; // DBの元の値
+    const pendingNow = btn.classList.contains("is-pending");
 
-    btn.classList.toggle("is-done", !isDone);
-    btn.classList.toggle("is-undone", isDone);
-    btn.querySelector("i").className = "bi " + (!isDone ? "bi-check-circle-fill" : "bi-circle");
-    btn.querySelector(".status").textContent = !isDone ? "完了" : "未";
-
-    pending[key] = !isDone;
+    // pending をトグル
+    if (pendingNow) {
+      btn.classList.remove("is-pending");
+      delete pending[key];
+    } else {
+      btn.classList.add("is-pending");
+      pending[key] = !original;
+    }
   });
 });
 
 document.getElementById("submitBtn").addEventListener("click", () => {
+  if (Object.keys(pending).length === 0) return;
+
   fetch("/bulk_update", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(pending)
   }).then(() => location.reload());
 });
+
 
 const fab = document.getElementById("infoFab");
 const panel = document.getElementById("infoPanel");
@@ -213,6 +225,27 @@ fab.addEventListener("click", () => {
 closeBtn.addEventListener("click", () => {
   panel.style.display = "none";
   fab.style.display = "flex";
+});
+
+function updateCardStatus() {
+  document.querySelectorAll(".ytn-card").forEach(card => {
+    const buttons = card.querySelectorAll(".ytn-toggle");
+    if (buttons.length === 0) return;
+
+    const allDone = Array.from(buttons).every(btn =>
+      btn.classList.contains("is-done")
+    );
+
+    card.classList.toggle("is-all-done", allDone);
+  });
+}
+
+// 初回ロード時
+updateCardStatus();
+
+// PUSH後に反映
+document.getElementById("submitBtn").addEventListener("click", () => {
+  setTimeout(updateCardStatus, 500);
 });
 
 </script>
