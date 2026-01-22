@@ -1,13 +1,24 @@
 from flask import Blueprint, render_template, redirect, url_for
 from .models import Feed, Trash, Walk, OptionalTask
 from . import db
+from flask import request, jsonify
 import datetime
 
 bp = Blueprint("main", __name__)
 
-DOGS = ["ぽんず", "てつ"]
-TIMES = ["朝", "昼", "夜"]
-OPTIONAL_TASKS = ["てつんぽ", "ゴミ出し", "洗濯物取り込み"]
+# 動物ごとに完全分離
+DOGS = ["てつ"]
+CATS = ["ぽんず"]
+
+TIMES_DOG = ["朝", "昼", "夜", "薬"]
+TIMES_CAT = ["朝", "昼", "夜"]
+
+OPTIONAL_TASKS = [
+    "てつんぽ",
+    "風呂洗い",
+    "ゴミ出し",
+    "洗濯物取り込み"
+]
 
 
 @bp.route("/initdb")
@@ -15,14 +26,30 @@ def initdb():
     db.create_all()
     return "✅ Tables created"
 
+@bp.route("/bulk_update", methods=["POST"])
+def bulk_update():
+    today = datetime.date.today().isoformat()
+    data = request.get_json()
+
+    for key, value in data.items():
+        typ, *rest = key.split("|")
+        if typ == "feed":
+            dog, time = rest
+            rec = Feed.query.filter_by(date=today, dog=dog, time=time).first()
+            if rec:
+                rec.fed = value
+        elif typ == "task":
+            task = rest[0]
+            rec = OptionalTask.query.filter_by(date=today, name=task).first()
+            if rec:
+                rec.done = value
+
+    db.session.commit()
+    return {"ok": True}
+
 
 def clean_old_data():
-    """
-    📅 今日より前の日付のデータを削除してDBをクリーンに保つ関数
-    （テーブル構造や今日のデータは保持）
-    """
     today = datetime.date.today().isoformat()
-    # 前日以前のレコードを削除
     db.session.query(Feed).filter(Feed.date != today).delete()
     db.session.query(Trash).filter(Trash.date != today).delete()
     db.session.query(Walk).filter(Walk.date != today).delete()
@@ -31,49 +58,52 @@ def clean_old_data():
 
 @bp.route("/")
 def index():
-    # 初回アクセス時にテーブルを作成
     db.create_all()
-
     today = datetime.date.today().isoformat()
-
-    # ★ 日付が変わっていたら古いデータをクリーンアップ
     clean_old_data()
 
-    # 今日のレコードが無ければ初期化
+    # 犬の初期化
     for dog in DOGS:
-        for t in TIMES:
+        for t in TIMES_DOG:
             if not Feed.query.filter_by(date=today, dog=dog, time=t).first():
                 db.session.add(Feed(date=today, dog=dog, time=t, fed=False))
-        # 任意作業（てつんぽ／ゴミ出し／洗濯物取り込み）の初期化
+
+    # 猫の初期化
+    for cat in CATS:
+        for t in TIMES_CAT:
+            if not Feed.query.filter_by(date=today, dog=cat, time=t).first():
+                db.session.add(Feed(date=today, dog=cat, time=t, fed=False))
+
+    # 通常業務
     for task in OPTIONAL_TASKS:
         if not OptionalTask.query.filter_by(date=today, name=task).first():
             db.session.add(OptionalTask(date=today, name=task, done=False))
-    db.session.commit()
-
 
     if not Trash.query.filter_by(date=today).first():
         db.session.add(Trash(date=today, taken=False))
 
     if not Walk.query.filter_by(date=today).first():
         db.session.add(Walk(date=today, taken=False))
+
     db.session.commit()
 
-    # 表示データを取得
     feeds = Feed.query.filter_by(date=today).all()
-    walk = Walk.query.filter_by(date=today).first()
-    trash = Trash.query.filter_by(date=today).first()
-
     state = {(f.dog, f.time): f.fed for f in feeds}
-    
+
     optionals = OptionalTask.query.filter_by(date=today).all()
-    optional_state = {opt.name: opt.done for opt in optionals}
+    optional_state = {o.name: o.done for o in optionals}
 
-    return render_template("index.html", today=today, state=state,
-                           DOGS=DOGS, TIMES=TIMES,
-                           trash=trash.taken, take_walk=walk.taken,
-                           OPTIONAL_TASKS=OPTIONAL_TASKS,
-                           optional_state=optional_state)
-
+    return render_template(
+        "index.html",
+        today=today,
+        state=state,
+        TIMES_DOG=TIMES_DOG,
+        TIMES_CAT=TIMES_CAT,
+        DOGS=DOGS,
+        CATS=CATS,
+        OPTIONAL_TASKS=OPTIONAL_TASKS,
+        optional_state=optional_state
+    )
 
 
 @bp.route("/toggle/<dog>/<time>")
@@ -84,23 +114,6 @@ def toggle(dog, time):
     db.session.commit()
     return redirect(url_for("main.index"))
 
-
-@bp.route("/toggle_take_walk")
-def toggle_take_walk():
-    today = datetime.date.today().isoformat()
-    walk = Walk.query.filter_by(date=today).first()
-    walk.taken = not walk.taken
-    db.session.commit()
-    return redirect(url_for("main.index"))
-
-
-@bp.route("/toggle_trash")
-def toggle_trash():
-    today = datetime.date.today().isoformat()
-    trash = Trash.query.filter_by(date=today).first()
-    trash.taken = not trash.taken
-    db.session.commit()
-    return redirect(url_for("main.index"))
 
 @bp.route("/toggle_optional/<task>")
 def toggle_optional(task):

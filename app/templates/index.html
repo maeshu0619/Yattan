@@ -4,138 +4,222 @@
   <meta charset="utf-8" />
   <title>YATTAN | タスクチェック共有アプリ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <!-- Bootstrap Icons（小さなアイコン用／任意） -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    rel="stylesheet"
-  />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- あなたの元のCSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <!-- 立体PUSHボタン用CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style_button.css') }}" />
 </head>
+
 <body class="bg-body-tertiary">
-  <!-- Hero -->
-  <header class="ytn-hero shadow-sm">
-    <div class="container py-4">
-      <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
-        <div>
-          <div class="d-inline-flex align-items-center gap-2">
-            <span class="ytn-logo rounded-3 d-inline-flex align-items-center justify-content-center">
-              <i class="bi bi-check2-circle"></i>
-            </span>
-            <h1 class="ytn-title mb-0">YATTAN</h1>
-          </div>
-          <p class="text-white-50 mb-0 mt-1">タスクチェック共有アプリ</p>
-          <p class="text-white-50 mb-0 mt-1">ver 3.0.1</p>
+
+<header class="ytn-hero shadow-sm">
+  <div class="container py-4">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+      <div>
+        <div class="d-inline-flex align-items-center gap-2">
+          <span class="ytn-logo rounded-3 d-inline-flex align-items-center justify-content-center">
+            <i class="bi bi-check2-circle"></i>
+          </span>
+          <h1 class="ytn-title mb-0">YATTAN</h1>
         </div>
-        <div class="ytn-date badge text-bg-light text-dark fs-6">
-          <i class="bi bi-calendar3 me-1"></i>{{ today }}
-        </div>
+        <p class="text-white-50 mb-0 mt-1">タスクチェック共有アプリ</p>
+        <p class="text-white-50 mb-0 mt-1">ver 3.1.1</p>
       </div>
-    </div>
-  </header>
-
-  <!-- Content -->
-  <main class="container py-5">
-    <!-- Legend -->
-    <div class="d-flex align-items-center gap-3 mb-4">
-      <span class="legend-dot done"></span><span class="small text-muted me-3">完了</span>
-      <span class="legend-dot undone"></span><span class="small text-muted">未完了</span>
-    </div>
-
-    <!-- Cards: 1カード=1ユーザー/1対象 -->
-    <div class="row g-4">
-      {% for dog in DOGS %}
-      <div class="col-12 col-md-6 col-lg-4">
-        <div class="card ytn-card h-100 border-0 shadow-sm">
-          <div class="card-body d-flex flex-column">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-              <div class="d-flex align-items-center gap-2">
-                <div class="avatar gradient"></div>
-                <h5 class="card-title mb-0">{{ dog }}</h5>
-              </div>
-              <!-- 完了率バッジ -->
-              {% set done = (TIMES | selectattr('__call__','equalto',None) | list) %}
-              {% set count_done = (TIMES | map('string') | list | length) %}
-              {% set n_done = (TIMES | map('string') | select('equalto', 'dummy') | list | length) %}
-              <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis ytn-badge"
-                    data-dog="{{ dog }}">– / –</span>
-            </div>
-
-            <div class="d-grid gap-2">
-              {% for t in TIMES %}
-                {% set fed = state[(dog, t)] %}
-                <a
-                  href="{{ url_for('main.toggle', dog=dog, time=t) }}"
-                  class="btn btn-lg ytn-toggle w-100 d-flex align-items-center justify-content-between
-                         {{ 'is-done' if fed else 'is-undone' }}"
-                  data-fed="{{ 1 if fed else 0 }}"
-                >
-                  <span class="d-flex align-items-center gap-2">
-                    <i class="bi {{ 'bi-check-circle-fill' if fed else 'bi-circle' }}"></i>
-                    <span class="fw-semibold">{{ t }}</span>
-                  </span>
-                  <span class="status text-muted small">{{ '完了' if fed else '未' }}</span>
-                </a>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-
-  <!-- てつの散歩 -->
-  <!-- 任意作業セクション -->
-  <div class="row g-4 mt-2">
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card ytn-card h-100 border-0 shadow-sm">
-        <div class="card-body d-flex flex-column">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <div class="avatar gradient"></div>
-            <h5 class="card-title mb-0">通常業務</h5>
-          </div>
-          <div class="d-grid gap-2">
-            {% for task in OPTIONAL_TASKS %}
-              {% set done = optional_state[task] %}
-              <a href="{{ url_for('main.toggle_optional', task=task) }}"
-                class="btn btn-lg ytn-toggle w-100 d-flex align-items-center justify-content-between
-                        {{ 'is-done' if done else 'is-undone' }}">
-                <span class="d-flex align-items-center gap-2">
-                  <i class="bi {{ 'bi-check-circle-fill' if done else 'bi-circle' }}"></i>
-                  <span class="fw-semibold">{{ task }}</span>
-                </span>
-                <span class="status text-muted small">{{ '完了' if done else '未' }}</span>
-              </a>
-            {% endfor %}
-          </div>
-        </div>
+      <div class="ytn-date badge text-bg-light text-dark fs-6">
+        <i class="bi bi-calendar3 me-1"></i>{{ today }}
       </div>
     </div>
   </div>
+</header>
 
+<main class="container py-5">
 
+<!-- ===== てつ（犬） ===== -->
+<div class="row g-4 mt-2">
+  {% for dog in DOGS %}
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="card ytn-card h-100 border-0 shadow-sm">
+      <div class="card-body d-flex flex-column">
 
-    <!-- Footer -->
-    <div class="text-center mt-5">
-      <p class="text-muted small mb-0">
-        <i class="bi bi-info-circle me-1"></i>
-        ボタンを押すと状態がトグルします
-      </p>
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <img class="avatar" src="{{ url_for('static', filename='images/dog.jpg') }}">
+          <h5 class="card-title mb-0">{{ dog }}</h5>
+        </div>
+
+        <div class="d-grid gap-2">
+          {% for t in TIMES_DOG %}
+          {% set fed = state[(dog, t)] %}
+          <button type="button"
+                  class="btn btn-lg ytn-toggle w-100 d-flex justify-content-between {{ 'is-done' if fed else 'is-undone' }}"
+                  data-dog="{{ dog }}"
+                  data-time="{{ t }}">
+            <span class="d-flex align-items-center gap-2">
+              <i class="bi {{ 'bi-check-circle-fill' if fed else 'bi-circle' }}"></i>
+              <span>{{ t }}</span>
+            </span>
+            <span class="status small">{{ '完了' if fed else '未' }}</span>
+          </button>
+          {% endfor %}
+        </div>
+
+      </div>
     </div>
-  </main>
+  </div>
+  {% endfor %}
+</div>
 
-  <script>
-    // ページ表示時に各カードの完了率を計算してバッジに反映（見た目改善）
-    document.querySelectorAll('.ytn-card').forEach(card => {
-      const toggles = card.querySelectorAll('.ytn-toggle');
-      const n = toggles.length;
-      const done = Array.from(toggles).filter(a => a.dataset.fed === '1').length;
-      const badge = card.querySelector('.ytn-badge');
-      if (badge) badge.textContent = `${done} / ${n}`;
-    });
-  </script>
+
+<!-- ===== ぽんず（猫） ===== -->
+<div class="row g-4 mt-2">
+  {% for cat in CATS %}
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="card ytn-card h-100 border-0 shadow-sm">
+      <div class="card-body d-flex flex-column">
+
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <img class="avatar" src="{{ url_for('static', filename='images/cat.jpg') }}">
+          <h5 class="card-title mb-0">{{ cat }}</h5>
+        </div>
+
+        <div class="d-grid gap-2">
+          {% for t in TIMES_CAT %}
+          {% set fed = state[(cat, t)] %}
+          <button type="button"
+                  class="btn btn-lg ytn-toggle w-100 d-flex justify-content-between {{ 'is-done' if fed else 'is-undone' }}"
+                  data-dog="{{ cat }}"
+                  data-time="{{ t }}">
+            <span class="d-flex align-items-center gap-2">
+              <i class="bi {{ 'bi-check-circle-fill' if fed else 'bi-circle' }}"></i>
+              <span>{{ t }}</span>
+            </span>
+            <span class="status small">{{ '完了' if fed else '未' }}</span>
+          </button>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+
+<!-- ===== 通常業務 ===== -->
+<div class="row g-4 mt-2">
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="card ytn-card h-100 border-0 shadow-sm">
+      <div class="card-body d-flex flex-column">
+
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="avatar gradient"></div>
+          <h5 class="card-title mb-0">通常業務</h5>
+        </div>
+
+        <div class="d-grid gap-2">
+          {% for task in OPTIONAL_TASKS %}
+          {% set done = optional_state[task] %}
+          <button type="button"
+                  class="btn btn-lg ytn-toggle w-100 d-flex justify-content-between {{ 'is-done' if done else 'is-undone' }}"
+                  data-task="{{ task }}">
+            <span class="d-flex align-items-center gap-2">
+              <i class="bi {{ 'bi-check-circle-fill' if done else 'bi-circle' }}"></i>
+              <span class="fw-semibold">{{ task }}</span>
+            </span>
+            <span class="status small">{{ '完了' if done else '未' }}</span>
+          </button>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PUSH送信ボタン ===== -->
+<div class="text-center mt-5">
+  <a id="submitBtn" class="btn btn-custom01">
+    <span class="btn-custom01-front">PUSH</span>
+    <i class="fas fa-angle-right fa-position-right"></i>
+  </a>
+</div>
+
+<!-- 右下お知らせボタン -->
+<div id="infoFab">
+  <i class="bi bi-envelope-fill"></i>
+</div>
+
+<!-- お知らせパネル -->
+<div id="infoPanel">
+  <div class="infoHeader">
+    <span>アップデート情報</span>
+    <button id="infoClose">✕</button>
+  </div>
+  <div class="infoBody">
+    <ul>
+      <li>ボタンを選択してからまとめて送信できるようになりました</li>
+      <li>てつとぽんずのアイコンを分かりやすくしました</li>
+      <li>通常業務に”風呂洗い”を追加しました</li>
+      <li>てつのタスクに薬を入れました</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<script>
+const pending = {};
+
+document.querySelectorAll(".ytn-toggle").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const dog = btn.dataset.dog || "";
+    const time = btn.dataset.time || "";
+    const task = btn.dataset.task || "";
+
+    const key = task !== "" ? "task|" + task : "feed|" + dog + "|" + time;
+
+    const isDone = btn.classList.contains("is-done");
+
+    btn.classList.toggle("is-done", !isDone);
+    btn.classList.toggle("is-undone", isDone);
+    btn.querySelector("i").className = "bi " + (!isDone ? "bi-check-circle-fill" : "bi-circle");
+    btn.querySelector(".status").textContent = !isDone ? "完了" : "未";
+
+    pending[key] = !isDone;
+  });
+});
+
+document.getElementById("submitBtn").addEventListener("click", () => {
+  fetch("/bulk_update", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(pending)
+  }).then(() => location.reload());
+});
+
+const fab = document.getElementById("infoFab");
+const panel = document.getElementById("infoPanel");
+const closeBtn = document.getElementById("infoClose");
+
+fab.addEventListener("click", () => {
+  panel.style.display = "block";
+  fab.style.display = "none";
+});
+
+closeBtn.addEventListener("click", () => {
+  panel.style.display = "none";
+  fab.style.display = "flex";
+});
+
+</script>
+
+
+
+
+
 </body>
 </html>

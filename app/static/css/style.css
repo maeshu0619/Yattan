@@ -102,3 +102,59 @@ body { letter-spacing: 0.01em; }
 }
 .legend-dot.done { background: #e8f7ee; border-color: #bfe6cd; }
 .legend-dot.undone { background: #fff; }
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;      /* 丸くする */
+  object-fit: cover;      /* 中央トリミング */
+  border: 2px solid #fff; /* きれいに見せる */
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+#infoFab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 56px;
+  height: 56px;
+  background: #ffd600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 1000;
+}
+
+#infoFab i {
+  font-size: 24px;
+}
+
+#infoPanel {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  padding: 12px;
+  display: none;
+  z-index: 1001;
+}
+
+.infoHeader {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+#infoClose {
+  border: none;
+  background: none;
+  font-size: 18px;
+  cursor: pointer;
+}

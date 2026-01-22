@@ -1,0 +1,72 @@
+@import "https://use.fontawesome.com/releases/v5.13.0/css/all.css";
+
+/* reset */
+.btn,
+a.btn,
+button.btn {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.5;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.1rem 3.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s ease;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 0.12em;
+  border-radius: 999px; /* pill shape */
+}
+
+/* main button */
+a.btn-custom01 {
+  background: linear-gradient(135deg, #ffe066, #ffd000);
+  color: #222;
+  box-shadow:
+    0 8px 24px rgba(255, 208, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  border: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* glass surface */
+a.btn-custom01 .btn-custom01-front {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 3.5rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0.05));
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+/* arrow */
+a.btn-custom01 i {
+  margin-left: 1rem;
+  font-size: 1.4rem;
+  transition: transform 0.25s ease;
+}
+
+/* hover */
+a.btn-custom01:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 32px rgba(255, 208, 0, 0.45),
+    0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+a.btn-custom01:hover i {
+  transform: translateX(4px);
+}
+
+/* active (pressed) */
+a.btn-custom01:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 4px 12px rgba(255, 208, 0, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+}
