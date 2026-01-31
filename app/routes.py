@@ -6,7 +6,6 @@ import datetime
 
 bp = Blueprint("main", __name__)
 
-# 動物ごとに完全分離
 DOGS = ["てつ"]
 CATS = ["ぽんず"]
 
@@ -16,9 +15,10 @@ TIMES_CAT = ["朝", "昼", "夜"]
 OPTIONAL_TASKS = [
     "朝てつんぽ",
     "夜てつんぽ",
-    "ぽんずトイレ",
     "ゴミ出し",
-    "洗濯物取り込み"
+    "洗濯物取り込み", 
+    "電気消灯", 
+    "ぽんずトイレ"
 ]
 
 
@@ -43,7 +43,12 @@ def bulk_update():
             task = rest[0]
             rec = OptionalTask.query.filter_by(date=today, name=task).first()
             if rec:
-                rec.done = value
+                if task == "ぽんずトイレ":
+                    rec.count += 1
+                    rec.done = True
+                else:
+                    rec.done = value
+
 
     db.session.commit()
     return {"ok": True}
@@ -103,7 +108,8 @@ def index():
         DOGS=DOGS,
         CATS=CATS,
         OPTIONAL_TASKS=OPTIONAL_TASKS,
-        optional_state=optional_state
+        optional_state=optional_state,
+        optionals=optionals      # ← これを追加
     )
 
 

@@ -28,7 +28,7 @@
           <h1 class="ytn-title mb-0">YATTAN</h1>
         </div>
         <p class="text-white-50 mb-0 mt-1">タスクチェック共有アプリ</p>
-        <p class="text-white-50 mb-0 mt-1">ver 3.1.1</p>
+        <p class="text-white-50 mb-0 mt-1">ver 3.3</p>
       </div>
       <div class="ytn-date badge text-bg-light text-dark fs-6">
         <i class="bi bi-calendar3 me-1"></i>{{ today }}
@@ -123,6 +123,7 @@
         <div class="d-grid gap-2">
           {% for task in OPTIONAL_TASKS %}
           {% set done = optional_state[task] %}
+          {% set rec = optionals | selectattr("name","equalto",task) | first %}
           <button type="button"
                   class="btn btn-lg ytn-toggle w-100 d-flex justify-content-between {{ 'is-done' if done else 'is-undone' }}"
                   data-task="{{ task }}">
@@ -130,7 +131,13 @@
               <i class="bi {{ 'bi-check-circle-fill' if done else 'bi-circle' }}"></i>
               <span class="fw-semibold">{{ task }}</span>
             </span>
-            <span class="status small">{{ '完了' if done else '未' }}</span>
+              <span class="status small">
+                {% if task == "ぽんずトイレ" %}
+                  {{ rec.count }}回
+                {% else %}
+                  {{ '完了' if done else '未' }}
+                {% endif %}
+              </span>
           </button>
           {% endfor %}
         </div>
@@ -162,10 +169,9 @@
   <div class="infoBody">
     <ul>
       <li>ボタンを選択してからまとめて送信できるようになりました</li>
-      <li>てつとぽんずのアイコンを分かりやすくしました</li>
-      <li>通常業務に”風呂洗い”を追加しました</li>
-      <li>てつのタスクに”薬”を入れました</li>
-      <li>すべてのタスクを完了すると"🎉 Congratulation!"が表示されるようになりました</li>
+      <li>てつのタスクの”薬”を削除しました</li>
+      <li>通常業務に”電気点灯”を追加しました</li>
+      <li>通常業務の”ぽんずトイレ”を回数カウントにしました</li>
     </ul>
   </div>
 </div>

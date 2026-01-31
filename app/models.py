@@ -27,3 +27,4 @@ class OptionalTask(db.Model):
     date = db.Column(db.String, default=lambda: datetime.date.today().isoformat())
     name = db.Column(db.String)
     done = db.Column(db.Boolean, default=False)
+    count = db.Column(db.Integer, default=0)

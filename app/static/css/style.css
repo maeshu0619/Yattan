@@ -70,6 +70,7 @@ body { letter-spacing: 0.01em; }
   --ytn-bg: #e8f7ee;
   --ytn-border: #bfe6cd;
   color: #0b6b3a;
+  font-size: 1.2rem;
 }
 .ytn-toggle.is-done .status { color: #0b6b3a !important; }
 
@@ -78,6 +79,7 @@ body { letter-spacing: 0.01em; }
   --ytn-bg: #fff;
   --ytn-border: #e7e7e7;
   color: #495057;
+  font-size: 1.2rem;
 }
 .ytn-toggle.is-undone .status { color: #6c757d !important; }
 
