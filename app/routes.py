@@ -9,15 +9,15 @@ bp = Blueprint("main", __name__)
 DOGS = ["てつ"]
 CATS = ["ぽんず"]
 
-TIMES_DOG = ["朝", "昼", "夜", "薬"]
+TIMES_DOG = ["朝", "昼", "夜"]
 TIMES_CAT = ["朝", "昼", "夜"]
 
 OPTIONAL_TASKS = [
     "朝てつんぽ",
     "夜てつんぽ",
     "ゴミ出し",
-    "洗濯物取り込み", 
-    "電気消灯", 
+    "洗濯物", 
+    "リビング点灯", 
     "ぽんずトイレ"
 ]
 
@@ -129,3 +129,4 @@ def toggle_optional(task):
     record.done = not record.done
     db.session.commit()
     return redirect(url_for("main.index"))
+
